@@ -55,7 +55,7 @@ class CustomAuthToken(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user =serializer._validated_data['user']
 
-        token, created =Token.objects.get_or_create(user=user)
+        token, _ =Token.objects.get_or_create(user=user)
 
         return Response(
             {
