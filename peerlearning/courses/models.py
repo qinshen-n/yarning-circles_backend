@@ -17,7 +17,6 @@
 #     image=models.URLField(blank=True, null=True)
 #     is_open = models.BooleanField(default=True)
 #     date_created = models.DateTimeField(auto_now_add=True)
-#     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='owned_courses')
 
 #     def __str__(self):
 #         return self.title
