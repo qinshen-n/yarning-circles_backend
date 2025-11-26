@@ -100,3 +100,4 @@ class FeaturedCourses(APIView):
         featured_courses = courses.annotate(avg_rating=Avg('comments__rating')).order_by('-avg_rating')[:5]
         serializer = CourseSerializer(featured_courses, many=True)
         return Response(serializer.data)
+#the end
