@@ -8,6 +8,10 @@ from .permissions import IsOwnerOrReadOnly ### imports custom permission class f
 from rest_framework.permissions import IsAuthenticated ### imports IsAuthenticated permission class from rest_framework.permissions
 from django.shortcuts import get_object_or_404 ### imports get_object_or_404 shortcut from django.shortcuts. This is used to retrieve an object or raise a 404 error if not found.
 from django.db.models import Avg ### imports Avg aggregation function from django.db.models. This is used to calculate the average rating for courses.
+import boto3
+from django.conf import settings
+from datetime import datetime
+import uuid
 
 class CourseListCreate(APIView): ### created a class-based view for listing and creating courses. We use APIView as the base class, therefore we need to define get and post methods.
     permission_classes = [permissions.AllowAny] ### sets the permission classes for this view. Only authenticated users can create courses, but anyone can view the list of courses.
@@ -51,7 +55,7 @@ class CourseDetail(APIView): ### created a class-based view for retrieving, upda
     ### defines the delete method to handle DELETE requests for deleting a specific course.
     def delete(self, request, pk):
         course = self.get_object(pk) ### load the course and check permissions.
-        course.delete() ### deletes the course object from the database.
+        course.delete() ### deletes the course object from the database.req_4eb7605a2565402091cdbdfdf1ce02c8
         return Response(status=status.HTTP_204_NO_CONTENT) ### returns a 204 No Content response indicating successful deletion.
 
 class CourseViewSet(viewsets.ModelViewSet): ### created a viewset for the Course model. This provides default implementations for CRUD( get, post,put,delete) operations.
@@ -101,3 +105,92 @@ class FeaturedCourses(APIView):
         serializer = CourseSerializer(featured_courses, many=True)
         return Response(serializer.data)
 #the end
+ALLOWED_FILES_TYPES = {
+    # Images
+    'image/jpeg': 15 * 1024 * 1024,      # 15MB for JPEG
+    'image/png': 15 * 1024 * 1024,       # 15MB for PNG
+    
+    # Videos  
+    'video/mp4': 500 * 1024 * 1024,      # 500MB for MP4
+    'video/quicktime': 500 * 1024 * 1024, # 500MB for MOV
+    
+    # PDFs
+    'application/pdf': 50 * 1024 * 1024   # 50MB for PDF
+}
+class PresignedURLCreate(APIView):
+    permission_classes = [IsAuthenticated]  ### only authenticated users can access this view.
+    def post(self, request):
+        # get detail of files to be uploaded
+        file_name = request.data.get('file_name')
+        file_type = request.data.get('file_type')
+        file_size = request.data.get('file_size')
+        # check if all above details are provided
+        if not all([file_name, file_type, file_size]):
+            return Response({
+                'error': 'file_name, file_type, and file_size are required'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # validate file type and size
+        if file_type not in ALLOWED_FILES_TYPES:
+            return Response({
+                'error': 'File type not allowed. Supported types: JPEG, PNG (max 15MB), MP4, MOV (max 500MB), PDF (max 50MB)'
+            }, status=status.HTTP_400_BAD_REQUEST)
+        # Get size limit for this file type
+        max_size = ALLOWED_FILES_TYPES[file_type]
+        
+        # Validate file size based on type
+        if file_size > max_size:
+            max_size_mb = max_size / (1024 * 1024)
+            return Response({
+                'error': f'File size too large. Maximum size for {file_type} is {max_size_mb:.0f}MB'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        try:
+            s3_client = boto3.client(
+                's3',
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+        except Exception as e:
+            print(f"An error occurred: {e}") 
+            return Response({ 'error': 'S3 configuration error'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)   
+
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        unique_id = str(uuid.uuid4())[:8]
+        file_extension = file_name.split('.')[-1] if '.' in file_name else ''
+        file_key = f"uploads/{timestamp}_{unique_id}.{file_extension}"
+
+        # Set expiration time (1 hour)
+        expires_in = 3600
+
+        # Generate presigned URL with conditions
+        conditions = [
+            ['content-length-range', 1, max_size],
+            {'Content-Type': file_type}
+        ]
+
+        presigned_post = s3_client.generate_presigned_post(
+            Bucket=settings.AWS_STORAGE_BUCKET_NAME,
+            Key=file_key,
+            Fields={
+                'Content-Type': file_type
+            },
+            Conditions=conditions,
+            ExpiresIn=expires_in
+        )
+
+        print(f"Generated presigned URL for file: {file_key}")    
+
+        public_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{file_key}"    
+        
+        return Response({
+            'upload_url': presigned_post['url'],
+            'fields': presigned_post['fields'],
+            'file_key': file_key,
+            'public_url': public_url,  # URL to access the file once uploaded
+            'expires_in': expires_in
+        }, status=status.HTTP_200_OK)
+    

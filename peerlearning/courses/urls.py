@@ -7,4 +7,5 @@ urlpatterns = [
     path('courses/<int:pk>/comments/', views.CommentList.as_view()),
     path('courses/<int:pk>/likes/', views.LikeList.as_view()),
     path('courses/features/', views.FeaturedCourses.as_view()),
+    path('courses/image-url/', views.PresignedURLCreate.as_view()),
 ]
