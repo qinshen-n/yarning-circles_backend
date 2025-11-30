@@ -56,13 +56,10 @@ class CommentSerializer(serializers.ModelSerializer): ### Serializer for the Com
         return instance
     
 class LikeSerializer(serializers.ModelSerializer):
-    author = serializers.ReadOnlyField(source='author.username') ### author field is a ForeignKey to the User model. By using source='author.username' we are telling DRF to use the id field of the related User model instead of the default representation.
-    likes_count = serializers.SerializerMethodField() ### Custom field to show the count of likes for each comment.
-
-    ### Same as course serializer
+    author = serializers.ReadOnlyField(source='author.username')
+    course = serializers.ReadOnlyField(source='course.id')
+    
     class Meta:
-        model = apps.get_model('courses.Like') ### model tells DRF which model to use for this serializer.
-        fields = '__all__' ### fields = '__all__' tells DRF to include all fields of the model in the serializer.    
-
-    def get_likes_count(self, obj):  ### Custom method to get the count of likes for a comment. obj is the comment instance being serialized.
-        return obj.likes.count() ### obj.likes reverse relationship defined in the Like model related_name='likes'. We use count() method to get the total number of likes for the comment.
+        model = apps.get_model('courses.Like')  # Use apps.get_model instead
+        fields = ['id', 'author', 'course', 'created_at']
+        read_only_fields = ['id', 'author', 'course', 'created_at']

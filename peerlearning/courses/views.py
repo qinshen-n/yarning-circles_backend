@@ -89,13 +89,18 @@ class LikeList(APIView): ### created a class-based view for listing and creating
     ### defines the post method to handle POST requests.
     def post(self, request, pk):
         course=get_object_or_404(Course, pk=pk) ### retrieves the course object by primary key (pk) or raises 404 if not found.
+        
+        # Check if user already liked this course
         if Like.objects.filter(author=request.user, course=course).exists():
-            return Response({"detail": "You have already liked this course."}, status=status.HTTP_406_NOT_ACCEPTABLE)
-        serializer = LikeSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(author=request.user, course=course)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "You have already liked this course."}, 
+                status=status.HTTP_400_BAD_REQUEST  # Changed from 406 to 400
+            )
+        
+        # Don't pass request.data if it's empty - create the like directly
+        like = Like.objects.create(author=request.user, course=course)
+        serializer = LikeSerializer(like)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class FeaturedCourses(APIView):
     permission_classes = [permissions.AllowAny] ### allows any user to access this view.
