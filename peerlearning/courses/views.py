@@ -18,7 +18,7 @@ class CourseListCreate(APIView): ### created a class-based view for listing and 
     ### defines the get method to handle GET requests.
     def get(self, request, format=None):
         courses = Course.objects.all()
-        serializer = CourseSerializer(courses, many=True)
+        serializer = CourseSerializer(courses, many=True, context={'request': request})  # Add context
         return Response(serializer.data)
     #### defines the post method to handle POST requests.
     def post(self, request, format=None):
@@ -41,7 +41,7 @@ class CourseDetail(APIView): ### created a class-based view for retrieving, upda
     #### defines the get method to handle GET requests for a specific course.
     def get(self, request, pk, format=None):
         course = self.get_object(pk) ### load the course and check permissions.
-        serializer = CourseDetailSerializer(course) ### serializes the course object using CourseDetailSerializer.
+        serializer = CourseDetailSerializer(course, context={'request': request})  # Add context
         return Response(serializer.data) ### returns the serialized data in the response.
     ### defines the put method to handle PUT requests for updating a specific course.
     def put(self, request, pk):
@@ -198,4 +198,4 @@ class PresignedURLCreate(APIView):
             'public_url': public_url,  # URL to access the file once uploaded
             'expires_in': expires_in
         }, status=status.HTTP_200_OK)
-    
+
