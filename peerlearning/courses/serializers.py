@@ -6,6 +6,7 @@ class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJan
     owner = serializers.ReadOnlyField(source='owner.username') ### My model has owner field which is a ForeignKey to the User model. DRF automaticlly give owner id but by using source = 'owner.username' we are telling DRF to use the username field of the related User model instead of the default id. Shows owners username instead of id.
     likes_count = serializers.SerializerMethodField() ### This doesnt have ForeignKey but we want to show the count of likes for each course. So we use SerializerMethodField to define a custom method that will return the count of likes.
     average_rating = serializers.SerializerMethodField() ### Similar to likes_count, we want to show average rating for each course based on the related comments. We will define a method to calculate the average rating.
+    user_has_liked = serializers.SerializerMethodField()  # Add this field
     
     class Meta: ###
         model = apps.get_model('courses.Course') ### model tells DRF to serializer which model to use for this serializer.
@@ -18,6 +19,13 @@ class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJan
     def get_average_rating(self, obj):
         avg = obj.comments.aggregate(Avg('rating'))['rating__avg']
         return round(avg, 2) if avg is not None else None
+    
+    def get_user_has_liked(self, obj):
+        """Check if the current user has liked this course"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.likes.filter(author=request.user).exists()
+        return False
 
 class CourseDetailSerializer(CourseSerializer): ### Inheriting from CourseSerializer to reuse its fields and methods.We created it in the above class.
     ### We could the below however, we are going to use for loop to make it more dynamic.
