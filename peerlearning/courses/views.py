@@ -7,7 +7,7 @@ from rest_framework import status, permissions, viewsets ### status gives me HTT
 from .permissions import IsOwnerOrReadOnly ### imports custom permission class from permissions.py
 from rest_framework.permissions import IsAuthenticated ### imports IsAuthenticated permission class from rest_framework.permissions
 from django.shortcuts import get_object_or_404 ### imports get_object_or_404 shortcut from django.shortcuts. This is used to retrieve an object or raise a 404 error if not found.
-from django.db.models import Avg ### imports Avg aggregation function from django.db.models. This is used to calculate the average rating for courses.
+from django.db.models import Avg, Count ### imports Avg aggregation function from django.db.models. This is used to calculate the average rating for courses.
 import boto3
 from django.conf import settings
 from datetime import datetime
@@ -105,9 +105,12 @@ class LikeList(APIView): ### created a class-based view for listing and creating
 class FeaturedCourses(APIView):
     permission_classes = [permissions.AllowAny] ### allows any user to access this view.
     def get(self, request):
-        courses=Course.objects.all()
-        featured_courses = courses.annotate(avg_rating=Avg('comments__rating')).order_by('-avg_rating')[:5]
-        serializer = CourseSerializer(featured_courses, many=True)
+        courses=Course.objects.all() # get all courses
+        featured_courses = courses.annotate(
+            likes_count=Count('likes')  # Count the number of likes per course
+        ).order_by('-likes_count')[:5]  # Sort by most likes (descending)
+        
+        serializer = CourseSerializer(featured_courses, many=True, context={'request': request})
         return Response(serializer.data)
 #the end
 ALLOWED_FILES_TYPES = {
