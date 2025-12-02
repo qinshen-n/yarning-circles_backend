@@ -54,6 +54,7 @@ class CommentSerializer(serializers.ModelSerializer): ### Serializer for the Com
     class Meta:
         model = apps.get_model('courses.Comment') ### model tells DRF which model to use for this serializer. 
         fields = '__all__' ### fields = '__all__' tells DRF to include all fields of the model in the serializer. It includes my custom fields such as author and likes_count as well.
+        read_only_fields = ['course']
 
 
     ### Similar to course detail serializer, we can create a update method to allow updating comments. 
