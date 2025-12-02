@@ -66,8 +66,9 @@ class CourseViewSet(viewsets.ModelViewSet): ### created a viewset for the Course
 class CommentList(APIView): ### created a class-based view for listing and creating comments.
     permission_classes = [permissions.IsAuthenticatedOrReadOnly] ### sets the permission classes for this view. Only authenticated users can create comments, but anyone can view the list of comments.
     ### defines the get method to handle GET requests.
-    def get(self, request, format=None):
-        comments = Comment.objects.all()
+    def get(self, request, pk, format=None):
+        ### filter comments so we only get them for THIS course
+        comments = Comment.objects.filter(course_id=pk)
         serializer = CommentSerializer(comments, many=True)
         return Response(serializer.data)
     ### defines the post method to handle POST requests.
