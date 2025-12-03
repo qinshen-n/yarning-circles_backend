@@ -1,5 +1,5 @@
-from .models import Course, Comment, Like ### imports my models from models.py
-from .serializers import CourseSerializer, CourseDetailSerializer, CommentSerializer, LikeSerializer ### imports my serializers from serializers.py
+from .models import Course, Comment, Like, Rating ### imports my models from models.py
+from .serializers import CourseSerializer, CourseDetailSerializer, CommentSerializer, LikeSerializer, RatingSerializer ### imports my serializers from serializers.py
 from rest_framework.views import APIView ### imports APIView from rest_framework. This allows me to create class-based views that handle HTTP requests.Get, Post, Put, Delete
 from rest_framework.response import Response ### imports Response from rest_framework. This is used to return HTTP responses with data and status codes.
 from django.http import Http404 ### imports Http404 exception from django.http. This is used to raise a 404 error when an object is not found.
@@ -112,6 +112,34 @@ class FeaturedCourses(APIView):
         ).order_by('-likes_count')[:5]  # Sort by most likes (descending)
         
         serializer = CourseSerializer(featured_courses, many=True, context={'request': request})
+        return Response(serializer.data)
+
+class CourseRatingListCreate(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        # upsert rating by user and course
+        rating_obj, created = Rating.objects.update_or_create(
+            user=request.user,
+            course=course,
+            defaults={
+                'score': request.data.get('score'),
+            }
+        )
+        # recompute aggregates
+        agg = Rating.objects.filter(course=course).aggregate(
+            count=Count('id'),
+            avg=Avg('score')
+        )
+        course.rating_count = agg['count'] or 0
+        course.rating_average = (agg['avg'] or 0) if agg['avg'] is not None else 0
+        course.save(update_fields=['rating_count', 'rating_average'])
+        return Response(RatingSerializer(rating_obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+    def get(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        qs = Rating.objects.filter(course=course).select_related('user')
+        serializer = RatingSerializer(qs, many=True)
         return Response(serializer.data)
 #the end
 ALLOWED_FILES_TYPES = {
