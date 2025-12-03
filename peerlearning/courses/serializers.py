@@ -4,6 +4,7 @@ from django.db.models import Avg
 
 class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJango REST framework class that provides a way to create serializers based on Django models.
     owner = serializers.ReadOnlyField(source='owner.username') ### My model has owner field which is a ForeignKey to the User model. DRF automaticlly give owner id but by using source = 'owner.username' we are telling DRF to use the username field of the related User model instead of the default id. Shows owners username instead of id.
+    owner_id = serializers.ReadOnlyField(source='owner.id')
     likes_count = serializers.SerializerMethodField() ### This doesnt have ForeignKey but we want to show the count of likes for each course. So we use SerializerMethodField to define a custom method that will return the count of likes.
     average_rating = serializers.SerializerMethodField() ### Kept for backward compatibility; now prefers course.rating_average.
     rating_count = serializers.SerializerMethodField()
