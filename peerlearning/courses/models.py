@@ -44,6 +44,8 @@ class Course(models.Model):
         ('archived', 'Archived'),
     ]
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft') ### Status of the course.
+    rating_count = models.PositiveIntegerField(default=0)
+    rating_average = models.DecimalField(max_digits=3, decimal_places=2, default=0)  ### e.g., 4.25
 
 class Comment(models.Model):
     content = models.TextField()
@@ -58,3 +60,12 @@ class Like(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('author', 'course') ### To ensure a user can like a course only once.    
+
+class Rating(models.Model):
+    course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name="ratings")
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name="course_ratings")
+    score = models.PositiveSmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    class Meta:
+        unique_together = ("user", "course")

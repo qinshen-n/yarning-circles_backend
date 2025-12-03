@@ -5,7 +5,8 @@ from django.db.models import Avg
 class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJango REST framework class that provides a way to create serializers based on Django models.
     owner = serializers.ReadOnlyField(source='owner.username') ### My model has owner field which is a ForeignKey to the User model. DRF automaticlly give owner id but by using source = 'owner.username' we are telling DRF to use the username field of the related User model instead of the default id. Shows owners username instead of id.
     likes_count = serializers.SerializerMethodField() ### This doesnt have ForeignKey but we want to show the count of likes for each course. So we use SerializerMethodField to define a custom method that will return the count of likes.
-    average_rating = serializers.SerializerMethodField() ### Similar to likes_count, we want to show average rating for each course based on the related comments. We will define a method to calculate the average rating.
+    average_rating = serializers.SerializerMethodField() ### Kept for backward compatibility; now prefers course.rating_average.
+    rating_count = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()  # Add this field
     
     class Meta: ###
@@ -17,8 +18,16 @@ class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJan
         return obj.likes.count()   ###obj.likes reverse relationship defined in the Like model related_name='likes'. We use count() method to get the total number of likes for the course. 
     
     def get_average_rating(self, obj):
-        avg = obj.comments.aggregate(Avg('rating'))['rating__avg']
+        # Prefer the denormalized field if present
+        if hasattr(obj, 'rating_average') and obj.rating_average is not None:
+            return float(obj.rating_average)
+        avg = obj.ratings.aggregate(Avg('score'))['score__avg']
         return round(avg, 2) if avg is not None else None
+
+    def get_rating_count(self, obj):
+        if hasattr(obj, 'rating_count') and obj.rating_count is not None:
+            return obj.rating_count
+        return obj.ratings.count()
     
     def get_user_has_liked(self, obj):
         """Check if the current user has liked this course"""
@@ -72,3 +81,10 @@ class LikeSerializer(serializers.ModelSerializer):
         model = apps.get_model('courses.Like')  # Use apps.get_model instead
         fields = ['id', 'author', 'course', 'created_at']
         read_only_fields = ['id', 'author', 'course', 'created_at']
+
+class RatingSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    class Meta:
+        model = apps.get_model('courses.Rating')
+        fields = ['id', 'course', 'user', 'score', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
