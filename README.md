@@ -1,5 +1,5 @@
-# Your Product Name
-> Your Group Name The Bears
+# Yarning Circles
+> Boolean Bears
 
 > [!NOTE]
 > This repo has been shared with your group. Use it to develop your group project.
@@ -52,80 +52,56 @@
 
 ## Mission Statement
 
-> [!NOTE]  
-> What is the purpose of your project? (approx 100-200 words). Example below.
+This project aims to create a dynamic and accessible peer-learning platform that empowers individuals to build knowledge, develop new skills, and learn collaboratively in a supportive environment. The goal is to make learning more accessible by enabling users to create, and participate in shared content. Users will be able to contribute written content across a range of predefined categories, helping others discover content that aligns with their learning preferences.
 
-Win-Wall is an online collaboration tool that provides organisers of SheCodes workshops as well as their attendees a visual workspace where they can add digital sticky notes to a blank digital wall in order to share wins with others during live events.
-This tool offers an unlimited number of digital win walls which are organised by event collection in order to facilitate collaboration during live events and easily bring all attendees’ wins to light in real time.
-Win-Wall comes packed full of features such as the ability to share a unique digital win wall to a live audience, easily approve and export win wall messages to upload on a WordPress website, manage user roles to give event organisers and attendees access to different functionalities, and many more.
+By combining user-generated material, the platform promotes ongoing skill development and continuous learning. Whether someone is seeking to upskill, explore a new hobby, or connect with others on a shared topic, this platform provides a central space to collaborate, learn, and grow together. The focus on accessibility ensures that users of all experience levels can easily navigate and contribute to their learning communities.
 
 ## Features
 
-> [!NOTE]  
-> Tell me the features your website will and will not have. Give detailed explanations, this is where you define the scope of your project. Example below.
-
-
 ### Summary 
-Provide Guest users ability to post sticky notes to a live event board. Once posted, users can view all posts for live event. Admin and approver access will allow events boards to be created, sticky notes to be edited, approved and exported.
+Visitors to the site may browse user created courses on a range of subjects. Creating an account allows users to create courses, enroll in available courses and provide feedback to other users through a course rating system. They may also track their course creation contributions and enrollments via their personal profile page.
 
 ### Users
 
 | Type               | Access                                                                                                                                                                                                                                                                                             | Role type assignment                                |
 | :----------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- |
-| Superuser or admin | <br> - All access   <br> - Can log in  <br> - Can log out  <br> - Create and manage events  <br> - Create and manage collections  <br> - Create and manage other users  <br> - Approve, archive and edit notes  <br> - Export notes as CSV  <br> - Can See and edit their details via profile page | Kate                                                |
-| Approver           | <br> - Can log in  <br> - Can log out  <br> - Approve, archive and edit notes  <br> - Can See and edit their details via profile page                                                                                                                                                              | Mentors, volunteers, shecodes11507 staff            |
-| Guest              | <br> - Create post it notes  <br> - Submit post it notes  <br> - View Live event board with all post it notes  <br> - can post with and without including their name                                                                                                                               | Public: Users who attend events, workshops, courses |
+| Account holder           | - Can log in  <br> - Can log out  <br> - View course cards  <br> - View course details and enroll in courses  <br> - Post comments to courses  <br> - "Like" and rate courses  <br> - Create and manage courses (update and delete)  <br> - View sumamry of course creations and course likes via Profile Page page                                                                                                                                                              | Educators, learners            |
+| Guest              | - View course cards                                                                                                                                 | Public, anyone visiting the website |
 
-### Sticky Notes
+### Courses
 
 | Feature                                        | Access                                                                                                                                                                                                           | Notes/Conditions                                                                                              |
 | :--------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------ |
-| Create                                         | Can be created by anyone with URL                                                                                                                                                                                | <br> - Limit length of sticky note text  <br> - option to add hashtag (TBC: as main text or additional field) |
-| Post                                           | Post as Guest                                                                                                                                                                                                    | <br> - Submits Sticky note to Live event board                                                                |
-| View                                           | Guests, Approvers and Admin can view posts via Live event board Admin and Approvers can view once status updated from Live                                                                                       |                                                                                                               |
-| Edit                                           | Can be edited by Admin and Approvers                                                                                                                                                                             | <br> - Edit sticky note text, eg: for spelling errors before Status is set to approved                        |
-| Statuses: Live, Unapproved, Approved, Archived | <br> - Auto status of notes will be ‘live’ based on linked event  <br> - Auto status of notes will be unapproved based on closure of linked event  <br> - Update to Approved and Archived by Admin and Approvers |                                                                                                               |
-| Export                                         | <br> - Export as Admin only                                                                                                                                                                                      | <br> - CSV file  <br> - Format: collection, event, sticky note text                                           |
-| Flag- Is Exported                              | <br> - Auto flag based on whether Admin has exported the sticky note                                                                                                                                             | <br> - Boolean                                                                                                |
-| Link to Collection                             | <br> - Controlled by Admin                                                                                                                                                                                       | <br> - Based on type of event, eg: shecodes flash, plus, other event types.                                   |
-| Link to Event                                  | <br> - Auto link based on event URL  <br> - Link to event can be edited by Admin                                                                                                                                 |                                                                                                               |
-| Link to Approver                               | <br> - Controlled by Admin and Approver who creates the event                                                                                                                                                    | <br> - Approver is User who is managing or associated with admin of the event                                 |
+| Create                                         | Logged in user        | - Organised by specified categories <br> - Allows written content supported by additional uploaded images, videos or pdf documents  |
+| Post                                           | Logged in user        | Submits course to website                                                                |
+| View                                           | - Public may view all all course cards on Home Page <br> - Logged in user may access full course details    | - Trying to access full course without login, will navigate to login page    |
+| Edit                                           | Courses can be edited by the course creator        | <br> - Update button only visible on course page to creator <br> - All course fields are editable        |
+| Delete                                         | Courses can be deleted by the course creator (logged in)     | - Delete button only visible on course page to creator <br> - Course deletion confirmation required via popup message      |
+| Max students                                   | Public and logged in users can view via course card     | - Course willm not allow further enrollments if max student cap is reached      |
+| Open/Closed                                    | Public and logged in users can view via course card  |   - Open allows more enrollments until max student cap, then closed             |
 
-### Collections
-
-| Feature                           | Access                     | Notes/Conditions           |
-| :-------------------------------- | :------------------------- | :------------------------- |
-| Assign events to a collection     | <br> - Based on event type |                            |
-| Assign approver to a collection   | <br> - admin               |                            |
-| Default event board live duration | <br> - Admin               | <br> - Based on event type |
-| View event boards by collection   | <br> - Admin, Approver     |                            |
-| Export notes by Collection        | <br> - Admin               |                            |
 
 ### Pages/Endpoint Functionality
 
 | Endpoint              | functionality                                                                                                                                                                     | comments                                                                                         |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| Create and post notes | <br> - Available to anyone with URL   <br> - Add sticky notes   <br> - Post sticky notes                                                                                          | <br> - Sticky note ‘feel’ is preferred  <br> - Easy to read and accessible  <br> - Good contrast |
-| Event board           | <br> - Once note is posted, redirect to live session  notes  <br> - Able to post more notes (redirect back or add directly?)  <br> - Live session ends at midnight – day of event | <br> - view live notes  <br> - search notes by text/hashtag                                      |
-| Admin page            | All admin functions  <br> - can also create another admin account                                                                                                                 | <br> - Requires auth  <br> - initial admin created by DB                                         |
-| Register as Approver  | <br> - users can register as approvers  <br> - once registered, approver can log in                                                                                               | Requires shecodes email address to be used                                                       |
-| Approver page         | Approver functions                                                                                                                                                                | Requires auth Easy to read, accessible, easy to use for new users                                |
-| Profile page          | <br> - All registered users  <br> - Can view their personal info  <br> - Can update their info                                                                                    | Requires auth                                                                                    |
+| Landing Page          | <br> - All users  <br> - Displays basic information regarding the website                                                                                    |                                                                                     |
+| Home Page | <br> - All users   <br> - View existing, open courses via course card   <br> - View featured courses (most liked) <br> - Search and/or sort course list                | <br> -   <br> -   <br> -  |
+| About Page           | - Features short bio of development team  <br> - links to team member social media | <br> -                                       |
+| Create Account Page            | - All users                                                                                                                  | - only 1 type of user                                         |
+| Login Page  | - Users can log in using created username and password                                                                                               |                                                        |
+| Create Course Page         | - Create course <br> - Written content entered into course content field, which supports formatting <br> Supported by additional uploaded images, videos or pdf documents                                                                                                                                                                | - Only these fields are necessary; <b> -                                |
+| Course Page          | - Logged in, enrolled users may view  <br> - Can "like" page  <br> - Can leave comment <br> - Can rate course <br> Can view all course content and open supporting material  <br> Course owner will see update and delete buttons                                                                                  | Requires auth    
+| Update Course Page   | - Logged in, owner users may view  <br> - Can update all course fields                                                                                  | Requires auth  |
+| Profile Page          | <br> - Can view their personal info, date joined, courses created, courses liked <br> - show badges earned through contributing to course creation                                                                                | Requires auth                                                                                    |
 
 ### Nice To Haves
 
-- Register during or after event; Sign up for additional events: Email address, Name, Event
-- History of my own notes as Registered user
-- Events I have registered for as Registered user
-- Be able to edit my own notes – as Registered user but only until its been approved
-- Bulk update sticky note status
-- QR code generation 
-- Use QR codes to access event as guest
+- Admin approval of courses after submission but before going live on website
+- Profile picture upload
+- Report to admin button
 
 ## Technical Implementation
-
-> [!NOTE]  
-> What languages and frameworks will you be using? What kind of database will you be using? How will you deploy the website? Example Below.
 
 ### Back-End
 
@@ -148,14 +124,7 @@ We will also use Insomnia to ensure API endpoints are working smoothly (we will 
 
 ## Target Audience
 
-> [!NOTE]  
-> Who is the website for? (approx 100 words). Example below.
-
-This website has two major target audiences: She Codes ‘Leaders, Volunteers & Mentors’, and ‘She Coders’ joining the one-day/short-term workshops. 
-
-**She Codes Leaders, Volunteers and Mentors** (administrators) will use this website to assign one-day workshop coders to specific events and/or collections where they can fill-out a “sticky note” win and paste it on the WinsWall. The administrators will then be able to sort, authorise and delete these stickies and easily download the data in a CSV file. This website is targeted towards this group in order to automate a normally menial task.
-
-**She Coders** (laypeople) will use this website to post their Win on a WinWall board, keep track of what events they’ve attended and also view previously written wins. This website is targeted to this group in order to prevent loss of paper data (physical sticky notes) and also make the WinsWall more interactive.
+The platform is designed for digital users of all abilities, with a strong emphasis on inclusivity and accessibility. It supports adult learners who are looking for flexible, self-paced opportunities to engage with content across a variety of topics. The platform aims to provide an environment where anyone can confidently participate, gain new skills, and connect through shared interests. A platform where users are enabled to share their knowledge with others by creating and sharing course content on categories they are interested in and have the information.
 
 ## Back-end Implementation
 ### API Specification
