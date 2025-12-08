@@ -85,8 +85,8 @@ Visitors to the site may browse user created courses on a range of subjects. Cre
 
 | Endpoint              | functionality                                                                                                                                                                     | comments                                                                                         |
 | :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------- |
-| Landing Page          | <br> - All users  <br> - Displays basic information regarding the website                                                                                    |                                                                                     |
-| Home Page | <br> - All users   <br> - View existing, open courses via course card   <br> - View featured courses (most liked) <br> - Search and/or sort course list                | <br> -   <br> -   <br> -  |
+| Landing Page          | - All users  <br> - Displays introductory information regarding the website                                                                                    |                                                                                     |
+| Home Page | - All users   <br> - View existing, open courses via course card   <br> - View featured courses (most liked) <br> - Search and/or sort course list                | <br> -   <br> -   <br> -  |
 | About Page           | - Features short bio of development team  <br> - links to team member social media | <br> -                                       |
 | Create Account Page            | - All users                                                                                                                  | - only 1 type of user                                         |
 | Login Page  | - Users can log in using created username and password                                                                                               |                                                        |
@@ -97,8 +97,10 @@ Visitors to the site may browse user created courses on a range of subjects. Cre
 
 ### Nice To Haves
 
+- Superuser or admin user who can delete any courses, comments.
 - Admin approval of courses after submission but before going live on website
 - Profile picture upload
+- Course picture upload
 - Report to admin button
 
 ## Technical Implementation
@@ -133,24 +135,21 @@ The platform is designed for digital users of all abilities, with a strong empha
 | :---------- | :---------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- | :----------------------- | :---------------------------------------------------- |
 | POST        | /login                              | Allow users to log in                                                                                                                    | ““Username”:”string”, “password”:”string”                                                                          | 200                      | Token auth                                            |
 | POST        | /logout                             | Allow users to log out ( end active session)                                                                                             | ““Username”:”string”, “password”:”string”                                                                          | 200                      | Will clear user log in session \- remove stored token |
-| POST        | /Register                           | Create new student or approver user                                                                                                      | “Username”:”string”, “FullName”: “string” “Email”:”string”,”Password”:”string”, ”Password2”:”string”,              | 201                      | Admin                                                 |
-| PUT         | /Profile/ID                         | Edit user                                                                                                                                | “Username”:”string”, “FullName”: “string” “Email”:”string”, “Avatar”:”string”,  “Bio”:”string”, “Socials”:”string” | 200                      | Admin, approver or student with matching ID           |
-| GET         | /Profile/ID                         | View User profile                                                                                                                        | NA                                                                                                                 | 200                      | Any                                                   |
-| DELETE      | /User/ID                            | Delete user                                                                                                                              | NA                                                                                                                 | 204                      | Admin, approver or student with matching ID           |
-| POST        | /EventCollection                    | Create new Event Collection                                                                                                              | “Title”:”string”, “IsExported”:”boolean” “Approver”: integer                                                       | 201                      | Admin                                                 |
-| PUT         | /EventCollection/Id                 | Update Event collection                                                                                                                  | “Title”:”string”, “IsExported”:”boolean”                                                                           | 200                      | Admin, Approver linked to event?                      |
-| DELETE      | /EventCollection/Id                 | Delete Event collection                                                                                                                  | NA                                                                                                                 | 204                      | Admin                                                 |
-| POST        | /EventBoard/                        | Create new Event board                                                                                                                   | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 201                      | Admin, approvers                                      |
-| PUT         | /EventBoard/ID                      | Update Event board                                                                                                                       | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 200                      | Admin, approvers                                      |
-| DELETE      | /EventBoard/ID                      | Delete Event board                                                                                                                       | NA                                                                                                                 | 204                      | Admin or author of event                              |
-| GET         | /EventBoard/ID                      | Get Event board details                                                                                                                  | NA                                                                                                                 | 200                      | Open access                                           |
-| POST        | /stickyNote/                        | Create a new sticky note as Guest user                                                                                                   | “WinComment”:”string”                                                                                              | 201                      | Open access                                           |
-| GET         | /stickyNotes/?Status=Live\&Event.ID | Get Sticky notes for an event  Use query params to filter by event ID and Status                                                         | NA                                                                                                                 | 200                      | Open access                                           |
-| GET         | /stickyNotes/?Event.ID              | Get Sticky notes for an event                                                                                                            | NA                                                                                                                 | 200                      | Admin, approvers                                      |
-| GET         | /stickyNotes/                       | Export sticky notes as CSV (eg:response.setContentType("text/csv")) Can optionally filter by: event ID, Status, isexported, collectionId | NA                                                                                                                 | 200                      | Admin                                                 |
-| PUT         | /stickyNotes/ID                     | Edit sticky note, update status of sticky note to Approved or Archived                                                                   | “WinComment”:”string”                                                                                              | 200                      | Admin, approvers                                      |
-| POST        | /StickyStatus                       | Create available statuses for stickyNotes                                                                                                | “StatusName”:”string”                                                                                              | 201                      | Admin                                                 |
-| GET         | /StickyStatus                       | Get all statuses                                                                                                                         | NA                                                                                                                 | 200                      | Admin                                                 |
+| POST        | /createaccount                           | Create new student or approver user                                                                                                      | “Username”:”string”, “FullName”: “string” “Email”:”string”,”Password”:”string”, ”Password2”:”string”,              | 201                      | Admin                                                 |
+| GET         | /users/:id                         | View User profile                                                                                                                        | NA                                                                                                                 | 200                      | Any                                                   |
+| POST        | /createcourse                    | Create new course                                                                                                              | “Title”:”string”, “IsExported”:”boolean” “Approver”: integer                                                       | 201                      | Admin                                                 |
+
+| GET        | /course/:id                 | View course details and content                                                                                                                  | “Title”:”string”, “IsExported”:”boolean”                                                                           | 200                      | Admin, Approver linked to event?                      |
+| PUT         | /course/update/:id                 | Update course details                                                                                                                  | “Title”:”string”, “IsExported”:”boolean”                                                                           | 200                      | Admin, Approver linked to event?                      |
+| DELETE      | /course/:id                 | Delete course                                                                                                                  | NA                                                                                                                 | 204                      | Admin                                                 |
+| GET        | courses/:id/comments/           | Get all comments for specfic course                                                                                                                  | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 201                      | Admin, approvers                                      |
+| POST        | courses/:id/comments/           | Post comment on course page                                                                                                                   | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 201                      | Admin, approvers                                      |
+| GET        | courses/:id/likes/           | Get all likes for specfic course                                                                                                                  | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 201                      | Admin, approvers                                      |
+| POST        | courses/:id/likes/           | Post like on course page                                                                                                                   | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 201                      | Admin, approvers                                      |
+| GET         | courses/features/                      | Get featured courses (most liked courses)                                                                                                                  | NA                                                                                                                 | 200                      | Open access                                           |
+| GET         | courses/:id/ratings/ | Get ratings for specific course  Use query params to filter by event ID and Status                                                         | NA                                                                                                                 | 200                      | Open access                                           |
+| POST        | courses/:id/ratings/                        | Rate a course (out of 5 stars)                                                                                                   | “WinComment”:”string”                                                                                              | 201                      | Open access                                           |
+| POST        | courses/image-url/                        | Create URL to view uploaded AWS hosted images                                                                                                   | “WinComment”:”string”                                                                                              | 201                      | Open access                                           |
 
 ### Object Definitions
 
@@ -162,28 +161,59 @@ The platform is designed for digital users of all abilities, with a strong empha
 | :----------------- | :-------- |
 | *User\_ID (PK)*    |           |
 | *Username*         | string    |
-| FullName           | string    |
 | *Email*            | string    |
 | *Password*         | string    |
-| *Password2*        | string    |
 | Auth\_ID (FK)      | integer   |
-| StickyNoteId (FK)  | integer   |
-| Event\_Id (FK)     | integer   |
-| Collection\_Id(FK) | integer   |
-| Avatar             | string    |
-| Bio                | string    |
-| SocialLink         | string    |
+| date_joined        | datetime  |
 
-#### Sticky Notes
+#### Courses
 | Field                   | Data Type |
-| :---------------------- | :-------- |
-| Sticky\_ID (PK)         | integer   |
-| WinComment              | string    |
-| Guest                   | boolean   |
-| UserId (FK)             | integer   |
-| Event\_Id (FK)          | integrer  |
-| Collection\_Id (FK)     | integrer  |
-| Sticky\_Status\_ID (FK) | integrer  |
+| :---------------------------- | :-------- |
+| Courses\_ID (PK)         | integer   |
+| title              | string    |
+| brief_description                   | string   |
+| course_content             | string   |
+| category          | string  |
+| owner (FK)     | integer  |
+| created_at | datetime  |
+| updated_at | datetime  |
+| image | URL field  |
+| is_open | boolean  |
+| max_students | integer  |
+| difficulty_level | string  |
+| duration_in_hours | integer  |
+| learning_objectives | string  |
+| enrollment_end | datetime  |
+| views_count | integer  |
+| completion | integer  |
+| status | string  |
+| rating_count | integer  |
+| rating_average | integer  |
+
+#### Comment
+| Field                   | Data Type |
+| :---------------------------- | :-------- |
+| Courses\_ID (PK)         | integer   |
+| content              | string    |
+| author                   | string   |
+| created_at | datetime  |
+
+#### Likes
+| Field                   | Data Type |
+| :---------------------------- | :-------- |
+| Courses\_ID (PK)         | integer   |
+| author                   | string   |
+| created_at | datetime  |
+
+#### Rating
+| Field                   | Data Type |
+| :---------------------------- | :-------- |
+| Courses\_ID (PK)         | integer   |
+| user                | string   |
+| score                | integer   |
+| created_at | datetime  |
+| updated_at | datetime  |
+
 
 > [!NOTE]  
 > ... etc
@@ -194,46 +224,3 @@ The platform is designed for digital users of all abilities, with a strong empha
 
 ![Our database schema](./img/schema.png)
 
-## Front-end Implementation
-
-### Wireframes
-
-> [!NOTE]  
-> Insert image(s) of your wireframes (could be a photo of hand-drawn wireframes or a screenshot of wireframes created using a tool such as https://www.mockflow.com/).
-
-See all wireframes and how Admins, Approvers and Students would see the Win Wall website: https://www.figma.com/file/cvP0Kc7lAX39Fvo12C5aLa/Win-Wall?node-id=22%3A1345 
-
-#### Home Page
-![](./img/homepage.png)
-
-#### Collection List Page
-![](./img/listpage.png)
-
-> [!NOTE]  
-> etc...
-
-### Logo
-![](./img/logo.png)
-
-### Colours
-#### Primary
-
-![](./img/primary.png)
-
-#### Secondary
-
-![](./img/secondary.png)
-
-### Font
-
-(We will create a ‘highlight-text’ font style in CSS with the glow effect as per the above - to use on hero section)
-Raleway
-Google fonts:
-
-```css
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;600;700&display=swap');
-font-family: 'Raleway', sans-serif;
-```
-(When Raleway is not available the standard font to be used is the Calibri font family)
-
-![](./img/fonts.png)
