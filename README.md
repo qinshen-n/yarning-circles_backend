@@ -1,24 +1,9 @@
 # Yarning Circles
 > Boolean Bears
 
-> [!NOTE]
-> This repo has been shared with your group. Use it to develop your group project.
->
-> Your group will have received two identical repos - one for your project's back-end, and another for the front-end. Although they are identical right now they are about to diverge, because you'll be using one to create a DRF project and the other to create a React project!
-
-> [!IMPORTANT]  
-> Use this `README.md` file to document your MVP using Markdown. Feel free to duplicate the product description aspects between the front-end README and the back-end README, but consider splitting out the technical design aspects to the specific repo that implements them. 
->
-> An example MVP spec (containing both front- and back-end descriptions) is set out below - you should replace it with your own content! (Remember to delete any "admonition" blocks like this `IMPORTANT` section, the `CAUTION` and `NOTE` sections, etc.)
-
-> [!CAUTION]  
-> In order to set up your project, **one** member of the group should clone this repo down, initialise a new React/DRF project, commit, and push. 
->
-> If more than one group member performs the setup, you'll have Git problems. Check out [the Git collaboration content](https://github.com/SheCodesAus/PlusLessonContent?tab=readme-ov-file#26---group-project) for more on how to use Git as a team.
-
 ## Table of Contents
 
-- [Your Product Name](#your-product-name)
+- [Yarning Circles](#your-product-name)
   - [Table of Contents](#table-of-contents)
   - [Mission Statement](#mission-statement)
   - [Features](#features)
@@ -40,7 +25,7 @@
 
 ## Mission Statement
 
-This project aims to create a dynamic and accessible peer-learning platform that empowers individuals to build knowledge, develop new skills, and learn collaboratively in a supportive environment. The goal is to make learning more accessible by enabling users to create, and participate in shared content. Users will be able to contribute written content across a range of predefined categories, helping others discover content that aligns with their learning preferences.
+This project aims to create a dynamic and accessible peer-learning platform that empowers individuals to build knowledge, develop new skills, and learn collaboratively in a supportive environment. The goal is to make learning more accessible by enabling users to create, and participate in shared content. Users will be able to contribute written content and additional uploaded learning material across a range of predefined categories, helping others discover content that aligns with their learning preferences.
 
 By combining user-generated material, the platform promotes ongoing skill development and continuous learning. Whether someone is seeking to upskill, explore a new hobby, or connect with others on a shared topic, this platform provides a central space to collaborate, learn, and grow together. The focus on accessibility ensures that users of all experience levels can easily navigate and contribute to their learning communities.
 
@@ -63,10 +48,10 @@ Visitors to the site may browse user created courses on a range of subjects. Cre
 | Create                                         | Logged in user        | - Organised by specified categories <br> - Allows written content supported by additional uploaded images, videos or pdf documents  |
 | Post                                           | Logged in user        | Submits course to website                                                                |
 | View                                           | - Public may view all all course cards on Home Page <br> - Logged in user may access full course details    | - Trying to access full course without login, will navigate to login page    |
-| Edit                                           | Courses can be edited by the course creator        | <br> - Update button only visible on course page to creator <br> - All course fields are editable        |
+| Edit                                           | Courses can be edited by the course creator        | - Update button only visible on course page to creator <br> - All course fields are editable        |
 | Delete                                         | Courses can be deleted by the course creator (logged in)     | - Delete button only visible on course page to creator <br> - Course deletion confirmation required via popup message      |
 | Max students                                   | Public and logged in users can view via course card     | - Course willm not allow further enrollments if max student cap is reached      |
-| Open/Closed                                    | Public and logged in users can view via course card  |   - Open allows more enrollments until max student cap, then closed             |
+| Open/Closed                                    | Public and logged in users can view via course card  |   - Open allows more enrollments until max student cap, then courses closes and is not visible on Home Page. <br> - Already enrolled students may then access the course via their Profile Page.             |
 
 
 ### Pages/Endpoint Functionality
@@ -85,11 +70,11 @@ Visitors to the site may browse user created courses on a range of subjects. Cre
 
 ### Nice To Haves
 
-- Superuser or admin user who can delete any courses, comments.
-- Admin approval of courses after submission but before going live on website
-- Profile picture upload
-- Course picture upload
-- Report to admin button
+- Moderation - Superuser or admin user who can delete any courses, comments.
+- Moderation - Admin approval of courses after submission but before going live on website
+- User Experience - Profile picture upload
+- User Experience - Course picture upload
+- Moderation/User Experience - Report to admin button
 
 ## Technical Implementation
 
@@ -134,7 +119,7 @@ The platform is designed for digital users of all abilities, with a strong empha
 | GET        | courses/:id/likes/           | Get all likes for specific course                                                                                                                  | “Title”: “string”, “StartDate”:”datetime”, “EndDate:”datetime”                                                     | 200                      |                                       |
 | POST        | courses/:id/likes/           | Post like on course page                                                                                                                   | "course": null                                                     | 201                      | Logged in user                                      |
 | GET         | courses/features/                      | Get featured courses (most liked courses)                                                                                                                  | NA                                                                                                                 | 200                      | Public                                           |
-| GET         | courses/:id/ratings/ | Get ratings for specific course  Use query params to filter by event ID and Status                                                         | NA                                                                                                                 | 200                      | Public                                           |
+| GET         | courses/:id/ratings/ | Get ratings for specific course                                                          | NA                                                                                                                 | 200                      | Public                                           |
 | POST        | courses/:id/ratings/                        | Rate a course (out of 5 stars)                                                                                                   |   "course": null, "score": null                                                                                            | 201                      | Logged in user                                           |
 | POST        | courses/image-url/                        | Create URL to view uploaded AWS hosted images                                                                                                   |                                                                                               | 201                      | Logged in user                                           |
 
@@ -158,8 +143,8 @@ The platform is designed for digital users of all abilities, with a strong empha
 | :---------------------------- | :-------- |
 | Courses\_ID (PK)         | integer   |
 | title              | string    |
-| brief_description                   | string   |
-| course_content             | string   |
+| brief_description                   | text   |
+| course_content             | text   |
 | category          | string  |
 | owner (FK)     | integer  |
 | created_at | datetime  |
@@ -169,7 +154,7 @@ The platform is designed for digital users of all abilities, with a strong empha
 | max_students | integer  |
 | difficulty_level | string  |
 | duration_in_hours | integer  |
-| learning_objectives | string  |
+| learning_objectives | text  |
 | enrollment_end | datetime  |
 | views_count | integer  |
 | completion | integer  |
@@ -180,23 +165,27 @@ The platform is designed for digital users of all abilities, with a strong empha
 #### Comment
 | Field                   | Data Type |
 | :---------------------------- | :-------- |
-| Courses\_ID (PK)         | integer   |
+| ID (PK)         | integer   |
 | content              | string    |
-| author                   | string   |
+| course (FK)  | string  |
+| author  (FK)                 | string   |
 | created_at | datetime  |
 
 #### Likes
 | Field                   | Data Type |
 | :---------------------------- | :-------- |
-| Courses\_ID (PK)         | integer   |
-| author                   | string   |
+| ID (PK)         | integer   |
+| course (FK)  | string |
+| author (FK)                   | string   |
 | created_at | datetime  |
+| unique_together | string, string |
 
 #### Rating
 | Field                   | Data Type |
 | :---------------------------- | :-------- |
-| Courses\_ID (PK)         | integer   |
-| user                | string   |
+| ID (PK)         | integer   |
+| course (FK) | string  |
+| user (FK)            | string   |
 | score                | integer   |
 | created_at | datetime  |
 | updated_at | datetime  |
@@ -206,8 +195,6 @@ The platform is designed for digital users of all abilities, with a strong empha
 > ... etc
 
 ### Database Schema
-> [!NOTE]  
-> Insert an image of your database schema (could be a photo of a hand-drawn schema or a screenshot of a schema created using a tool such as ​​https://drawsql.app/). Example below.
 
-![Our database schema](./img/schema.png)
+![Our database schema](./database.drawio.svg)  
 
