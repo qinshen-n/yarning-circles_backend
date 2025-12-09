@@ -3,12 +3,14 @@
 
 ## Table of Contents
 
-- [Yarning Circles](#your-product-name)
+- [Yarning Circles](#yarning-circles)
   - [Table of Contents](#table-of-contents)
   - [Mission Statement](#mission-statement)
   - [Features](#features)
     - [Summary](#summary)
     - [Users](#users)
+    - [Courses](#courses)
+    - [Courses](#courses-1)
     - [Pages/Endpoint Functionality](#pagesendpoint-functionality)
     - [Nice To Haves](#nice-to-haves)
   - [Technical Implementation](#technical-implementation)
@@ -20,6 +22,10 @@
     - [API Specification](#api-specification)
     - [Object Definitions](#object-definitions)
       - [Users](#users-1)
+      - [Courses](#courses-2)
+      - [Comment](#comment)
+      - [Likes](#likes)
+      - [Rating](#rating)
     - [Database Schema](#database-schema)
 
 
@@ -27,6 +33,7 @@
 
 This project aims to create a dynamic and accessible peer-learning platform that empowers individuals to build knowledge, develop new skills, and learn collaboratively in a supportive environment. The goal is to make learning more accessible by enabling users to create, and participate in shared content. Users will be able to contribute written content and additional uploaded learning material across a range of predefined categories, helping others discover content that aligns with their learning preferences.
 
+By combining user-generated material, the platform promotes ongoing skill development and continuous learning. Whether someone is seeking to upskill, explore a new hobby, or connect with others on a shared topic, this platform provides a central space to collaborate, learn, and grow together. The focus on accessibility ensures that users of all experience levels can easily navigate and contribute to their learning communities.
 By combining user-generated material, the platform promotes ongoing skill development and continuous learning. Whether someone is seeking to upskill, explore a new hobby, or connect with others on a shared topic, this platform provides a central space to collaborate, learn, and grow together. The focus on accessibility ensures that users of all experience levels can easily navigate and contribute to their learning communities.
 
 ## Features
@@ -41,6 +48,7 @@ Visitors to the site may browse user created courses on a range of subjects. Cre
 | Account holder           | - Can log in  <br> - Can log out  <br> - View course cards  <br> - View course details and enroll in courses  <br> - Post comments to courses  <br> - "Like" and rate courses  <br> - Create and manage courses (update and delete)  <br> - View sumamry of course creations and course likes via Profile Page page                                                                                                                                                              | Educators, learners            |
 | Guest              | - View course cards                                                                                                                                 | Public, anyone visiting the website |
 
+### Courses
 ### Courses
 
 | Feature                                        | Access                                                                                                                                                                                                           | Notes/Conditions                                                                                              |
@@ -89,12 +97,13 @@ Visitors to the site may browse user created courses on a range of subjects. Cre
 - HTML/CSS
 
 ### Git & Deployment
+
 - Heroku
 - Netlify
 - GitHub
 
 This application's back-end will be deployed to Heroku. The front-end will be deployed separately to Netlify.
- 
+
 We will also use Insomnia to ensure API endpoints are working smoothly (we will utilise a local and deployed environment in Insomnia).
 
 ## Target Audience
@@ -102,6 +111,7 @@ We will also use Insomnia to ensure API endpoints are working smoothly (we will 
 The platform is designed for digital users of all abilities, with a strong emphasis on inclusivity and accessibility. It supports adult learners who are looking for flexible, self-paced opportunities to engage with content across a variety of topics. The platform aims to provide an environment where anyone can confidently participate, gain new skills, and connect through shared interests. A platform where users are enabled to share their knowledge with others by creating and sharing course content on categories they are interested in and have the information.
 
 ## Back-end Implementation
+
 ### API Specification
 
 | HTTP Method | URL                                 | Purpose                                                                                                                                  | Request Body                                                                                                       | Successful Response Code | Authentication and Authorization                      |
