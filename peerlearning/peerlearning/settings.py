@@ -32,6 +32,9 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 CORS_ORIGIN_ALLOW_ALL = True
+CSRF_TRUSTED_ORIGINS = [
+    'https://yarning-circles-app-qin-gae9htbyg2ddfbcu.australiaeast-01.azurewebsites.net',
+]
 
 # Application definition
 
