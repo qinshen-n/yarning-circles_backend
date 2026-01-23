@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from django.apps import apps
 from django.db.models import Avg
+from .models import (
+    CircleMeeting,
+    MeetingRSVP,
+    CircleMilestone,
+    MilestoneCompletion
+)
 
 class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJango REST framework class that provides a way to create serializers based on Django models.
     owner = serializers.ReadOnlyField(source='owner.username') ### My model has owner field which is a ForeignKey to the User model. DRF automaticlly give owner id but by using source = 'owner.username' we are telling DRF to use the username field of the related User model instead of the default id. Shows owners username instead of id.
@@ -89,3 +95,127 @@ class RatingSerializer(serializers.ModelSerializer):
         model = apps.get_model('courses.Rating')
         fields = ['id', 'course', 'user', 'score', 'created_at', 'updated_at']
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+    # Serializer for CircleMeeting model
+class CircleMeetingSerializer(serializers.ModelSerializer):
+    # Read-only fields that show related data
+    created_by = serializers.ReadOnlyField(source='created_by.username')
+
+    # Calculated fields
+    rsvp_yes_count = serializers.SerializerMethodField()
+    rsvp_maybe_count = serializers.SerializerMethodField()
+    rsvp_no_count = serializers.SerializerMethodField()
+    user_rsvp_status = serializers.SerializerMethodField()
+    attendees = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = CircleMeeting
+        fields = [
+            'id', 'circle', 'title', 'description', 'datetime', 
+            'duration_minutes', 'meeting_type', 'online_link', 
+            'physical_location', 'created_by', 'created_at',
+            'rsvp_yes_count', 'rsvp_maybe_count', 'rsvp_no_count',
+            'user_rsvp_status', 'attendees'
+        ]
+        read_only_fields = ['id', 'created_by', 'created_at']
+
+    def get_rsvp_yes_count(self, obj):
+        # Count how many people RSVP'd 'yes'
+        return obj.rsvps.filter(status='yes').count()
+    
+    def get_rsvp_maybe_count(self, obj):
+        # Count how many people RSVP'd 'maybe'
+        return obj.rsvps.filter(status='maybe').count()
+    
+    def get_rsvp_no_count(self, obj):
+        # Count how many people RSVP'd 'no'
+        return obj.rsvps.filter(status='no').count()
+    
+    def get_user_rsvp_status(self, obj):
+        # Get current user's RSVP status (yes/maybe/no or None)
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            rsvp = obj.rsvps.filter(user=request.user).first()
+            return rsvp.status if rsvp else None
+        return None
+    
+    def get_attendees(self, obj):
+        # Get list of usernames who RSVP'd 'yes'
+        return list(
+            obj.rsvps.filter(status='yes')
+            .values_list('user__username', flat=True)
+        )
+    
+
+# Serializer for MeetingRSVP model
+class MeetingRSVPSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    meeting_title = serializers.ReadOnlyField(source='meeting.title')
+    
+    class Meta:
+        model = MeetingRSVP
+        fields = [
+            'id', 'meeting', 'meeting_title', 'user', 
+            'status', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+# Serializer for CircleMilestone model
+class CircleMilestoneSerializer(serializers.ModelSerializer):
+    # Calculated fields
+    completion_count = serializers.SerializerMethodField()
+    completion_percentage = serializers.SerializerMethodField()
+    user_completed = serializers.SerializerMethodField()
+    completed_by = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CircleMilestone
+        fields = [
+            'id', 'circle', 'title', 'description', 'order', 'created_at',
+            'completion_count', 'completion_percentage', 
+            'user_completed', 'completed_by'
+        ]
+        read_only_fields = ['id', 'created_at']
+    
+    def get_completion_count(self, obj):
+        # How many users completed this milestone
+        return obj.completions.count()
+    
+    def get_completion_percentage(self, obj):
+        # Percentage of enrolled users who completed this
+        
+        # Get all unique users who have completions in this circle
+        all_completions = MilestoneCompletion.objects.filter(
+            milestone__circle=obj.circle
+        ).values('user').distinct().count()
+
+        # If no one has started, return 0
+        if all_completions == 0:
+            return 0
+        
+        # Calculate percentage
+        completed = obj.completions.count()
+        return round((completed / all_completions) * 100) if all_completions > 0 else 0
+    
+    def get_user_completed(self, obj):
+        # Did the current user complete this milestone?
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.completions.filter(user=request.user).exists()
+        return False
+    
+    def get_completed_by(self, obj):
+        # List of usernames who completed this milestone
+        return list(
+            obj.completions.values_list('user__username', flat=True)
+        )
+
+# Serializer for MilestoneCompletion model
+class MilestoneCompletionSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.username')
+    milestone_title = serializers.ReadOnlyField(source='milestone.title')
+
+    class Meta:
+        model = MilestoneCompletion
+        fields = ['id', 'milestone', 'milestone_title', 'user', 'completed_at']
+        read_only_fields = ['id', 'user', 'completed_at']
