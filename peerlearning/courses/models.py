@@ -47,6 +47,120 @@ class Course(models.Model):
     rating_count = models.PositiveIntegerField(default=0)
     rating_average = models.DecimalField(max_digits=3, decimal_places=2, default=0)  ### e.g., 4.25
 
+### Circle Meetings ###
+# WHO & WHEN; Schedule sync meetings for peer learning circles
+class CircleMeeting(models.Model):
+    circle = models.ForeignKey(
+        'Course',
+        on_delete=models.CASCADE,
+        related_name='meetings'
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    datetime = models.DateTimeField() 
+    duration_minutes = models.PositiveIntegerField(default=60)
+
+    MEETING_TYPE_CHOICES = [
+        ('online', 'Online'),
+        ('hybrid', 'Hybrid'),
+        ('in-person', 'In Person'),
+    ]
+    meeting_type = models.CharField(
+        max_length=20,
+        choices=MEETING_TYPE_CHOICES,
+        default='online'
+    )
+    # Location Field
+    online_link = models.URLField(blank=True, help_text="Zoom/Teams/Meet link")
+    physical_location =models.CharField(
+        max_length=300,
+        blank=True,
+        help_text="Physical address if hybrid or in-person"
+    )
+    
+    created_by = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='created_meetings'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['datetime'] # Show upcoming meetings first
+
+    def __str__(self):
+        return f"{self.circle.title} - {self.title} ({self.datetime.strftime('%Y-%m-%d %H:%M')})"
+
+### Meeting RSVPs
+class MeetingRSVP(models.Model):
+    meeting = models.ForeignKey(
+        CircleMeeting,
+        on_delete=models.CASCADE,
+        related_name='rsvps'
+    )
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='meeting_rsvps'
+    )
+
+    RSVP_CHOICES = [
+        ('yes', 'Yes'),
+        ('maybe', 'Maybe'),
+        ('no', 'No'),
+    ]
+    status = models.CharField(max_length=10, choices=RSVP_CHOICES, default='yes')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('meeting', 'user') #Unique together constraint
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.meeting.title} ({self.status})"
+
+### Circle Milestones ###
+class CircleMilestone(models.Model):
+    circle = models.ForeignKey(
+        'Course', 
+        on_delete=models.CASCADE, 
+        related_name='milestones'
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField()
+    order = models.PositiveIntegerField(default=0)  # For sorting
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['order']  # Display in the order facilitator sets
+        unique_together = ('circle', 'order')  # No duplicate order numbers
+    
+    def __str__(self):
+        return f"{self.circle.title} - Milestone {self.order}: {self.title}"
+
+### Milestone Completions ###
+class MilestoneCompletion(models.Model):
+    milestone = models.ForeignKey(
+        CircleMilestone,
+        on_delete=models.CASCADE,
+        related_name='completions'
+    )
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='milestone_completions'
+    )
+    completed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('milestone', 'user')
+        ordering = ['-completed_at']
+
+    def __str__(self):
+        return f"{self.user.username} completed {self.milestone.title}"
+
 class Comment(models.Model):
     content = models.TextField()
     course = models.ForeignKey("Course", on_delete=models.CASCADE, related_name='comments')
@@ -69,3 +183,47 @@ class Rating(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     class Meta:
         unique_together = ("user", "course")
+
+class CircleBadge(models.Model):
+    BADGE_TYPE_CHOICES = [
+        ('circle_complete', 'Circle Complete'),
+        ('first_milestone', 'First Milestone'),
+        ('all_milestones', 'All Milestones Complete'),
+        ('helpful_contributor', 'Helpful Contributor'),
+        ('perfect_attendance', 'Perfect Attendance'),
+    ]
+    
+    badge_type = models.CharField(
+        max_length=50,
+        choices=BADGE_TYPE_CHOICES
+    )
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='circle_badges'
+    )
+    circle = models.ForeignKey(
+        'Course',
+        on_delete=models.CASCADE,
+        related_name='badges_earned'
+    )
+    earned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-earned_at'] # Show newest first
+        unique_together = ('user', 'circle', 'badge_type')
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.get_badge_type_display()} ({self.circle.title})"
+    
+    @property
+    def badge_icon(self):
+        """Return emoji icon for badge type"""
+        icons = {
+            'circle_complete': '🏆',
+            'first_milestone': '🌱',
+            'all_milestones': '⭐',
+            'helpful_contributor': '💬',
+            'perfect_attendance': '📅',
+        }
+        return icons.get(self.badge_type, '🎖️')
