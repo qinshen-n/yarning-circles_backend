@@ -1,5 +1,5 @@
-from .models import Course, Comment, Like, Rating ### imports my models from models.py
-from .serializers import CourseSerializer, CourseDetailSerializer, CommentSerializer, LikeSerializer, RatingSerializer ### imports my serializers from serializers.py
+from .models import Course, Comment, Like, Rating, CircleMeeting, MeetingRSVP, CircleMilestone, MilestoneCompletion ### imports my models from models.py
+from .serializers import CourseSerializer, CourseDetailSerializer, CommentSerializer, LikeSerializer, RatingSerializer, CircleMeetingSerializer, MeetingRSVPSerializer, CircleMilestoneSerializer, MilestoneCompletionSerializer ### imports my serializers from serializers.py
 from rest_framework.views import APIView ### imports APIView from rest_framework. This allows me to create class-based views that handle HTTP requests.Get, Post, Put, Delete
 from rest_framework.response import Response ### imports Response from rest_framework. This is used to return HTTP responses with data and status codes.
 from django.http import Http404 ### imports Http404 exception from django.http. This is used to raise a 404 error when an object is not found.
@@ -231,3 +231,162 @@ class PresignedURLCreate(APIView):
             'expires_in': expires_in
         }, status=status.HTTP_200_OK)
 
+class CircleMeetingList(APIView):
+    # Get: list all meetings for a circle
+    # POST: Create a new meeting (facilitator only)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    def get(self, request, pk):
+        # Get all meetings for this circle
+        circle = get_object_or_404(Course, pk=pk)
+        meetings = CircleMeeting.objects.filter(circle=circle).order_by('datetime')
+        serializer = CircleMeetingSerializer(
+            meetings,
+            many=True,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+    
+    def post(self, request, pk):
+        # Create a new meeting (facilitator only)
+        circle = get_object_or_404(Course, pk=pk)
+
+        # Only owner can create meetings
+        if circle.owner != request.user:
+            return Response(
+                {'detail': 'Only the circle facilitator can schedule meetings.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        serializer = CircleMeetingSerializer(
+            data=request.data,
+            context={'request':request}
+        )
+        if serializer.is_valid():
+            serializer.save(circle=circle, created_by=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CircleMeetingDetail(APIView):
+    # Get: Get a specific meeting
+    # Post: Delete a meeting (facilitator only)
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get_object(self, pk):
+        try:
+            return CircleMeeting.objects.get(pk=pk)
+        except CircleMeeting.DoesNotExist:
+            raise Http404
+        
+    def get(self, request, meeting_id):
+        # Get meeting details
+        meeting = self.get_object(meeting_id)
+        serializer = CircleMeetingSerializer(meeting, context={'request': request})
+        return Response(serializer.data)
+    
+    def delete(self, request, meeting_id):
+        # Delete meeting (facilitator only)
+        meeting = self.get_object(meeting_id)
+
+        # only facilitator who created it can delete
+        if meeting.created_by != request.user:
+            return Response(
+                {'detail': 'Only the facilitator can delete this meeting.'},
+                    status=status.HTTP_403_FORBIDDEN
+            )
+
+        meeting.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class CircleMeetingRSVP(APIView):
+    # Post: create or update RSVP for a meeting
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, meeting_id):
+        # Create or update RSVP
+        meeting = get_object_or_404(CircleMeeting, pk=meeting_id)
+        rsvp_status = request.data.get('status', 'yes')
+
+        # Validate Status
+        if rsvp_status not in ['yes', 'maybe', 'no']:
+            return Response(
+                {'detail': 'Invalid status. Must be yes, maybe, or no.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Update or create RSVP
+        rsvp, created = MeetingRSVP.objects.update_or_create(
+            meeting=meeting,
+            user=request.user,
+            defaults={'status': rsvp_status}
+        )
+        
+        serializer = MeetingRSVPSerializer(rsvp)
+        return Response(
+            serializer.data, 
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK
+        )
+    
+class CircleMilestoneList(APIView):
+    # Get: list all milestones for a circle
+    # Post: create a new milestone (facilitator only)
+    permissions_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, pk):
+        # Get all milestones for this circle
+        circle = get_object_or_404(Course, pk=pk)
+        milestones = CircleMilestone.objects.filter(circle=circle).order_by('order')
+        serializer = CircleMilestoneSerializer(
+            milestones, 
+            many=True, 
+            context={'request': request}
+        )
+        return Response(serializer.data)
+    
+    def post(self, request, pk):
+        """Create a new milestone (facilitator only)"""
+        circle = get_object_or_404(Course, pk=pk)
+        
+        # Only owner can create milestones
+        if circle.owner != request.user:
+            return Response(
+                {'detail': 'Only the circle facilitator can create milestones.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        serializer = CircleMilestoneSerializer(
+            data=request.data, 
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save(circle=circle)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class CircleMilestoneComplete(APIView):
+    # Post: toggle milestone completion for current user
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, milestone_id):
+        # Mark milestone as complete/incomplete (toggle)
+        milestone = get_object_or_404(CircleMilestone, pk=milestone_id)
+
+    # Check if already completed
+        completion = MilestoneCompletion.objects.filter(
+            milestone=milestone,
+            user=request.user
+        ).first()
+        
+        if completion:
+            # Already completed - remove it (toggle off)
+            completion.delete()
+            return Response(
+                {'status': 'uncompleted', 'message': 'Milestone marked as incomplete'},
+                status=status.HTTP_200_OK
+            )
+        else:
+            # Not completed - create it (toggle on)
+            completion = MilestoneCompletion.objects.create(
+                milestone=milestone,
+                user=request.user
+            )
+            serializer = MilestoneCompletionSerializer(completion)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
