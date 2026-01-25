@@ -328,7 +328,7 @@ class CircleMeetingRSVP(APIView):
 class CircleMilestoneList(APIView):
     # Get: list all milestones for a circle
     # Post: create a new milestone (facilitator only)
-    permissions_classes = [permissions.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request, pk):
         # Get all milestones for this circle

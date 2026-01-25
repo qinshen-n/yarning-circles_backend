@@ -117,7 +117,7 @@ class CircleMeetingSerializer(serializers.ModelSerializer):
             'rsvp_yes_count', 'rsvp_maybe_count', 'rsvp_no_count',
             'user_rsvp_status', 'attendees'
         ]
-        read_only_fields = ['id', 'created_by', 'created_at']
+        read_only_fields = ['id', 'circle', 'created_by', 'created_at']
 
     def get_rsvp_yes_count(self, obj):
         # Count how many people RSVP'd 'yes'
@@ -175,7 +175,7 @@ class CircleMilestoneSerializer(serializers.ModelSerializer):
             'completion_count', 'completion_percentage', 
             'user_completed', 'completed_by'
         ]
-        read_only_fields = ['id', 'created_at']
+        read_only_fields = ['id', 'circle', 'created_at']
     
     def get_completion_count(self, obj):
         # How many users completed this milestone
