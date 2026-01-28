@@ -15,7 +15,10 @@ class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJan
     average_rating = serializers.SerializerMethodField() ### Kept for backward compatibility; now prefers course.rating_average.
     rating_count = serializers.SerializerMethodField()
     user_has_liked = serializers.SerializerMethodField()  # Add this field
-    
+    is_joined = serializers.SerializerMethodField()
+    participants_count = serializers.SerializerMethodField()
+    participant_names = serializers.SerializerMethodField()
+
     class Meta: ###
         model = apps.get_model('courses.Course') ### model tells DRF to serializer which model to use for this serializer.
         fields = '__all__' ### fields = '__all__' tells DRF to include all fields of the model in the serializer. It includes my custom fields such as owner, likes count, average_rating as well.
@@ -30,7 +33,10 @@ class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJan
         if request and request.user.is_authenticated:
             return obj.participants.filter(id=request.user.id).exists()
         return False
-
+    
+    def get_participant_names(self, obj):
+        # Get the usernames of the first 8 people who joined
+        return obj.participants.values_list('username', flat=True)[:8]
     
     def get_likes_count(self, obj): ### Custom method to get the count of likes for a course. obj is the course instance being serialized.
         return obj.likes.count()   ###obj.likes reverse relationship defined in the Like model related_name='likes'. We use count() method to get the total number of likes for the course. 
