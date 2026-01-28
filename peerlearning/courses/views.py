@@ -231,6 +231,28 @@ class PresignedURLCreate(APIView):
             'expires_in': expires_in
         }, status=status.HTTP_200_OK)
 
+class JoinCircleView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        course = get_object_or_404(Course, pk=pk)
+        
+        # Toggle Logic:
+        # If user is already in participants -> Remove them (Leave)
+        # If user is NOT in participants -> Add them (Join)
+        if request.user in course.participants.all():
+            course.participants.remove(request.user)
+            return Response(
+                {"message": "Left the circle", "is_joined": False},
+                status=status.HTTP_200_OK
+            )
+        else:
+            course.participants.add(request.user)
+            return Response(
+                {"message": "Joined the circle", "is_joined": True},
+                status=status.HTTP_200_OK
+            )
+
 class CircleMeetingList(APIView):
     # Get: list all meetings for a circle
     # POST: Create a new meeting (facilitator only)

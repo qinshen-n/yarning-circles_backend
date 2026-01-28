@@ -19,6 +19,11 @@ class Course(models.Model):
     ] ### This is the list of categories for the courses. It will be drop down menu in the frontend.Might be multiple choice or radio button. To be checked later.
     category = models.CharField(max_length=100, choices=CATEGORY_CHOICES , default='arts and crafts') #### Default value to be changed later.
     owner = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='courses') #### The user who created the course.
+    participants = models.ManyToManyField(
+        get_user_model(),
+        related_name = "join_courses",
+        blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True) ### The date and time when the course was created.
     updated_at = models.DateTimeField(auto_now=True) ### The date and time when the course was last updated. It might be hard to track this in the frontend.Nice to have feature.
     image=models.URLField(blank=True, null=True) ### URL for the course image. Optional field for now. Trying to change this with upload feature later.

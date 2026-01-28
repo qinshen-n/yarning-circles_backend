@@ -18,4 +18,6 @@ urlpatterns = [
     # Circle Progress
     path('courses/<int:pk>/milestones/', views.CircleMilestoneList.as_view(), name='circle-milestones'),
     path('milestones/<int:milestone_id>/complete/', views.CircleMilestoneComplete.as_view(), name='milestone-complete'),
+
+    path('courses/<int:pk>/join/', views.JoinCircleView.as_view(), name='join-circle'),
 ]

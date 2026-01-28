@@ -21,6 +21,17 @@ class CourseSerializer(serializers.ModelSerializer):  ###ModelSerializer is DJan
         fields = '__all__' ### fields = '__all__' tells DRF to include all fields of the model in the serializer. It includes my custom fields such as owner, likes count, average_rating as well.
         read_only_fields = ('owner', 'views_count', 'completions', 'created_at', 'updated_at')
 
+    def get_participants_count(self, obj):
+        return obj.participants.count()
+
+    def get_is_joined(self, obj):
+        """Check if current user is in the participants list"""
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.participants.filter(id=request.user.id).exists()
+        return False
+
+    
     def get_likes_count(self, obj): ### Custom method to get the count of likes for a course. obj is the course instance being serialized.
         return obj.likes.count()   ###obj.likes reverse relationship defined in the Like model related_name='likes'. We use count() method to get the total number of likes for the course. 
     
