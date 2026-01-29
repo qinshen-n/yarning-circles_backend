@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from .models import CustomUser
+from courses.models import Course
 
 class CustomUserSerializer(serializers.ModelSerializer):
     courses_created = serializers.SerializerMethodField()
     courses_liked = serializers.SerializerMethodField()
+    courses_joined = serializers.SerializerMethodField()
     
     class Meta:
         model = CustomUser
@@ -24,4 +26,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
         
         likes = Like.objects.filter(author=obj).select_related('course')
         courses = [like.course for like in likes]
+        return CourseSerializer(courses, many=True, context=self.context).data
+    
+    def get_courses_joined(self, obj):
+        """Return courses the user is enrolled in (but didn't create)"""
+        from courses.serializers import CourseSerializer
+        
+        # Get courses where user is a participant but not the owner
+        courses = obj.join_courses.exclude(owner=obj)
         return CourseSerializer(courses, many=True, context=self.context).data
